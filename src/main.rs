@@ -2,7 +2,6 @@ use lambda_http::{
     http::header::CONTENT_TYPE, run, service_fn, Body, 
     Request, RequestExt, Response, Error,
 };
-use html_escape::encode_text;
 use serde::Serialize;
 use tracing::{info, instrument};
 
