@@ -1,17 +1,22 @@
 use lambda_http::{
     http::header::CONTENT_TYPE, run, service_fn, Body, 
-    Request, Response, Error,
+    Request, RequestExt, Response, Error,
 };
+use html_escape::encode_text;
 
 async fn function_handler(
     event: Request,
 ) -> Result<Response<Body>, Error> {
-    dbg!(event);
-    let html = "<html><body><h1>hello!</h1></body></html>";
+    let who = event
+    .query_string_parameters_ref()
+    .and_then(|param| param.first("name"))
+    .unwrap_or("world");
+    
+    let html = format!("<html><body><h1>hello {}</h1></body></html>", encode_text(who));
     let resp = Response::builder()
         .status(200)
         .header(CONTENT_TYPE, "text/html")
-        .body(Body::Text(html.to_string()))?;
+        .body(Body::Text(html))?;
 
     Ok(resp)
 }

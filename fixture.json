@@ -85,11 +85,11 @@
 		]
 	},
 	"queryStringParameters": {
-		"name": "me"
+		"name": "sang"
 	},
 	"multiValueQueryStringParameters": {
 		"name": [
-			"me"
+			"sang"
 		]
 	},
 	"pathParameters": {
