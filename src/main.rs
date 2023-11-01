@@ -3,7 +3,15 @@ use lambda_http::{
     Request, RequestExt, Response, Error,
 };
 use html_escape::encode_text;
+use serde::Serialize;
+use tracing::{info, instrument};
 
+#[derive(Serialize)]
+struct ApiResponse {
+    data: String,
+}
+
+#[instrument]
 async fn function_handler(
     event: Request,
 ) -> Result<Response<Body>, Error> {
@@ -12,11 +20,17 @@ async fn function_handler(
     .and_then(|param| param.first("name"))
     .unwrap_or("world");
     
-    let html = format!("<html><body><h1>hello {}</h1></body></html>", encode_text(who));
+    let message = format!(
+        "Hello {who}, this is an Netlify serverless request"
+    );
+    info!(who, message);
+    let api_response = ApiResponse { data: message };
+    let body_text = serde_json::to_string(&api_response)?;
+
     let resp = Response::builder()
         .status(200)
-        .header(CONTENT_TYPE, "text/html")
-        .body(Body::Text(html))?;
+        .header(CONTENT_TYPE, "application/json")
+        .body(Body::Text(body_text))?;
 
     Ok(resp)
 }
@@ -24,5 +38,7 @@ async fn function_handler(
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
+    tracing_subscriber::fmt().json().init();
+
     run(service_fn(function_handler)).await
 }
